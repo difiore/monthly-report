@@ -1,7 +1,7 @@
 ---
 title: "How to do the Monthly Report"
 author: "Anthony Di Fiore"
-date: "10/5/2017"
+date: "11/25/2017"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -16,7 +16,7 @@ library(here) # for working directory
 library(tidyverse) # for dplyr, readr, stringr, tidyr, tibble, and purrr
 library(lubridate) # supposedly in tidyverse but maybe not
 library(readxl) # to read in xlsx files
-library(lettercase)
+# library(lettercase)
 library(ggplot2)
 library(knitr)
 library(sqldf)
@@ -147,7 +147,7 @@ Sys.setenv(TZ=timezone) # this sets the TZ for the current environment to the fi
 
 - Open the *Proyecto Primates Main Database* and query the `observer samples` and `observer activity data` for data collected during the month in question. Set up the query as an "inner join" query (i.e., under join properites, select [1], i.e., "include rows where the joined fields from both tables are equal"...
 
-<img src="img/OS-AV-inner-join-query.png" width="500px"/>
+<img src="img/OS-OA-inner-join-query.png" width="500px"/>
 
 Export the resulting query as "OS-OA-inner-join-query.xlsx" in `.xlsx` format. Move that file into the same folder as this document.
 
@@ -160,14 +160,15 @@ d <- read_xlsx("OS-OA-inner-join-query.xlsx", guess_max = 10000) # guess max set
 d <- rename(d, `Obs Sample ID` = `observer samples_Obs Sample ID`)
 d <- select(d, -`obs activity data_Obs Sample ID`)
 
-# Alternatively, we can read in two complete tables of observer samples and observer activity dumped from Access and do the inner join on them directly in R... uncomment the lines below to do this.
+# Alternatively, we can read in two complete tables of observer samples and observer activity dumped from Access and do the inner join on them directly in R...
 
-# os <- read_xlsx("observer samples.xlsx", guess_max = 10000) # guess max set close to length of file
-# oa <- read_xlsx("obs activity data.xlsx", guess_max = 30000) # guess max set close to length of file
-# d <- inner_join(os, oa, by = "Obs Sample ID")
+os <- read_xlsx("observer samples.xlsx", guess_max = 10000) # guess max set close to length of file
+oa <- read_xlsx("obs activity data.xlsx", guess_max = 30000) # guess max set close to length of file
+d <- inner_join(os, oa, by = "Obs Sample ID")
 
-# Note: the line above will give us the same result as doing an inner join query in Access BUT we don't wind up with two variables for Obs Sample ID so the `rename` step above isn't necessary, nor is the `select` step to drop the second Obs Sample ID variable
-# We could also use a "right_join" to return all rows of obs activity data plus matching rows of observer samples; these *should* be equivalent as obs activity data should always have an observer sample parent! 
+# Note: the line above will give us the same result as doing an inner join query in Access BUT we don't wind up with two variables for Obs Sample ID so the `rename` step above isn't necessary, nor is the `select` step to drop the second Obs Sample ID variable.
+
+# Note: We could also use a "right_join" to return all rows of obs activity data plus matching rows of observer samples; these *should* be equivalent as obs activity data should always have an observer sample parent!
 
 d <- rowid_to_column(d, "rowID")
 vars <- c("rowID", "Obs Sample ID", "Observer", "Date", "GPS Used", "Time Start", "Time End", "Activity")
@@ -197,7 +198,7 @@ if (!is.null(warnings)) {
 	print(warnings)
 	}
 
-d <- d %>% filter(Duration > 0) # this keeps only lines with duration > 0
+d <- d %>% filter(Duration > 0 ) # this keeps only lines with duration > 0
 
 output <- d %>% group_by(`Observer`, `Date`, `Obs Sample ID`, `General Activity`) %>% summarize(`Duration` = sum(`Duration`, na.rm = T)) %>% spread(`General Activity`, `Duration`, fill = 0, convert = FALSE) %>% mutate(`Total`=`Camp - Personal` + `Camp - Project` + `Field Work`) %>% ungroup() %>% select(`Observer`, `Date`, `Obs Sample ID`, `Field Work`, `Camp - Project`, `Camp - Personal`, `Total`)
 
@@ -228,28 +229,32 @@ output_summary_md
 
 ### Generating Section 2.3 - Avistajes Summary
 
-- Open the *Proyecto Primates Main Database* and query the `observer samples` and `avistajes` tables for data collected during the month in question. Set up the query as an "right join" query (i.e., under join properites, select [3], i.e., "include ALL records from `avistajes` and only those records from `observer samples` where the joined fields are equal"...Export the resulting query as "OS-AV-query-right-join.xlsx" in `.xlsx` format. Move that file into the same folder as this document.
+- Open the *Proyecto Primates Main Database* and query the `observer samples` and `avistajes` tables for data collected during the month in question. Set up the query as a "right join" query (i.e., under join properites, select [3], i.e., "include ALL records from `avistajes` and only those records from `observer samples` where the joined fields are equal"...
 
-> NOTE: be sure to do what is known as a RIGHT JOIN, where we select rows from the nested table and match those up with a parent... this way OSs with no AVs do not get selected (and we drop any AVs that do not have a parent OS)
+<img src="img/OS-AV-right-join-query.png" width="500px"/>
+
+Export the resulting query as "OS-AV-query-right-join.xlsx" in `.xlsx` format. Move that file into the same folder as this document.
+
+> NOTE: be sure to do what is known as a RIGHT JOIN, where we select rows from the nested table and match those up with a parent... this way OSs with no AVs do not get selected (and we drop any AVs that do not have a parent OS).
 
 - Open `R` and run the following:
 
 ``` {r}
-# The following code parses the results of a the right join of `observer samples` and `avistajes`; here, we start with a query of two tables in Access...
+# The following code parses the results of the right join of `observer samples` and `avistajes`; here, we start with a query of two tables in Access...
 
 d <- read_xlsx("OS-AV-right-join-query.xlsx", guess_max = 10000) # guess max set close to length of file
 d <- rename(d, `Obs Sample ID` = `observer samples_Obs Sample ID`)
 d <- select(d, -`avistajes_Obs Sample ID`)
 
-# Alternatively, we can read in two complete tables of observer samples and avistajes dumped from Access and do the right join on them directly in R... uncomment the lines below to do this.
+# Alternatively, we can read in two complete tables of observer samples and avistajes dumped from Access and do the right join on them directly in R...
 
-# os <- read_xlsx("observer samples.xlsx", guess_max = 10000) # guess max set close to length of file
-# av <- read_xlsx("avistajes.xlsx", guess_max = 30000) # guess max set close to length of file
-# d <- right_join(os, av, by = "Obs Sample ID")
+os <- read_xlsx("observer samples.xlsx", guess_max = 10000) # guess max set close to length of file
+av <- read_xlsx("avistajes.xlsx", guess_max = 30000) # guess max set close to length of file
+d <- right_join(os, av, by = "Obs Sample ID")
 
-# Note: the line above will give us the same result as doing an right join query in Access BUT we don't wind up with two variables for Obs Sample ID so the `rename` step above isn't necessary, nor is the `select` step to drop the second Obs Sample ID variable
+# Note: The line above will give us the same result as doing the right join query in Access BUT we don't wind up with two variables for Obs Sample ID so the `rename` step above isn't necessary, nor is the `select` step to drop the second Obs Sample ID variable.
 
-# We could also use inner_join to return only rows of avistaje data that have matching rows of observer samples; these *should* be equivalent as avistaje data should always have an observer sample parent
+# Note: We could also use inner_join to return only rows of avistaje data that have matching rows of observer samples; these *should* be equivalent as avistaje data should always have an observer sample parent.
 
 d <- rowid_to_column(d, "rowID")
 vars <- c("rowID", "Obs Sample ID", "Observer", "Date", "GPS Used", "Avistaje ID", "Taxon", "Group", "Time Enc", "Time Left/Lost", "Other Observer Present", "Found in Sleep Tree", "Left in Sleep Tree")
@@ -278,7 +283,8 @@ d <- filter(d, `Duration` > 0) # for summarizing avistajes, pick only those wher
 output <- d %>% mutate(`Start`=format(`Time Enc`, format="%H:%M:%S"),`End`=format(`Time Left/Lost`, format="%H:%M:%S")) %>% select(`Observer`, `Date`, `Avistaje ID`, `Taxon`, `Group`, `Start`, `End`, `Duration`)
 units(output$`Duration`) <- "hours"
 
-kable(output, digits=3, caption="Avistajes by Observer and Date")
+output_md <- kable(output, digits=3, caption="Avistajes by Observer and Date")
+output_md
 
 output_summary <- group_by(output,`Observer`,`Taxon`, `Group`) %>% 
 	summarize(`minDate`=min(`Date`),`maxDate`=max(`Date`), `minAV`=min(`Avistaje ID`), `maxAV`=max(`Avistaje ID`), `AV Count`= n(), `Total Duration`=sum(`Duration`, na.rm = T)) %>%
