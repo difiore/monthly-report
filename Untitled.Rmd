@@ -13,10 +13,6 @@ Each section may have a narrative part and a quantitative part in order to devel
 
 The quantitative part is crucial because it is the one that will tell us that all the data have been entered, cleaned and organized.
 
-
-
-
-
 Quantitative Section
 
 The quantitative section will have in numbers a description of the work you did this month -- # of avistajes per group (or solitary), # of focals per individual, and # and type of biological samples collected, etc.
@@ -58,7 +54,6 @@ AM
 
  
 
- 
 
 Age/Sex Class Totals
 
@@ -111,37 +106,10 @@ d <- rename(d, `Obs Sample ID` = `observer samples_Obs Sample ID`, `Avistaje ID`
 
 # this bit fixes dates and times
 
-d$Y <- year(d$Date)
-d$m <- month(d$Date)
-d$d <- day(d$Date)
 
-d$H <- hour(d$`Time Enc`)
-d$M <- minute(d$`Time Enc`)
-d$S <- second(d$`Time Enc`)
-
-d$`Time Enc` <- make_datetime(year=d$Y,month=d$m,day=d$d, hour=d$H, min=d$M, sec=d$S)
-
-d$H <- hour(d$`Time Left/Lost`)
-d$M <- minute(d$`Time Left/Lost`)
-d$S <- second(d$`Time Left/Lost`)
-
-d$`Time Left/Lost` <- make_datetime(year=d$Y,month=d$m,day=d$d, hour=d$H, min=d$M, sec=d$S)
-
-d$H <- hour(d$`Time Start`)
-d$M <- minute(d$`Time Start`)
-d$S <- second(d$`Time Start`)
-
-d$`Time Start` <- make_datetime(year=d$Y,month=d$m,day=d$d, hour=d$H, min=d$M, sec=d$S)
-
-d$H <- hour(d$`Time End`)
-d$M <- minute(d$`Time End`)
-d$S <- second(d$`Time End`)
-
-d$`Time End` <- make_datetime(year=d$Y,month=d$m,day=d$d, hour=d$H, min=d$M, sec=d$S)
 
 d <- d[with(d, order(Date,`Time Enc`)), ]
 
-d <- select(d, -c(`Y`,`m`,`d`,`H`,`M`,`S`))
 
 d <- mutate(d, `Avistaje Duration` = `Time Left/Lost` - `Time Enc`, units="secs")
 d <- mutate(d, `Focal Duration` = `Time End` - `Time Start`, units="secs")

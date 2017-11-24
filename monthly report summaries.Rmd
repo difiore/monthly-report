@@ -70,11 +70,19 @@ The summary should have the following components:
 
 2.2 - Observer Activity - Summary tables reporting general information on the activities of *each person* on the project, including dates at the station and number of OSs. This should be generated using `R` code (see below).
 
-2.3 - Avistajes Summary - A summary table reporting general information on the data collected by *each person and team* , including dates, number of AV collected, and total AV duration. This should be generated using `R` code (see below). Also include brief descriptions of notable observations made in the context of particular avistajes.
+2.3 - Avistajes Summary - A summary table reporting general information on the data collected by *each person and team*, including dates, number of AV collected, and total AV duration. This should be generated using `R` code (see below). Also include brief descriptions of notable observations made in the context of particular avistajes.
 
 *Example:*
 
 > AV08140 - 2017-09-12 - While doing routine demography work, I picked up a dead signal on Cuenca's collar (Faster beep rhythm). Found the collar on the ground with the ball chain broken at the base of the unit.
+
+
+2.4 - Focal Sample Summary - A summary table reporting general information on the data collected on each focal animal, including dates, number of FSs collected, and total FS duration. This should be generated using `R` code (see below). Also include brief descriptions of notable observations made in the context of particular focal samples.
+
+*Example:*
+
+> NEED THIS.
+
 
 
 ### 3. DEMOGRAPHY SECTION
@@ -298,7 +306,10 @@ output_summary_md <- kable(output_summary, digits=3, caption="Avistaje Summary b
 output_summary_md
 ```
 
-## Generating Section 3.2 - Demography Summary
+### Generating Section 2.4 - Focal Sample Summary
+
+
+### Generating Section 3.2 - Demography Summary
 
 - Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, and `roll call demography` tables in `.xlsx` format. Move those files into the same folder as this document.
 
@@ -367,10 +378,12 @@ d$`Animal Name` <- str_replace_all(d$`Animal Name`,"/","") # clean off terminal 
 d <- right_join(d,ind, by=c("Animal Name", "Group", "Taxon")) %>% filter(`Group` %in% groups, `Sex` == "Male" | `Sex` == "Female") %>% mutate(`Status`=if_else(!is.na(`Status`),1,0))
 
 output <- d %>% group_by(`Sex`,`Age`,`Animal Name`) %>% summarize(`# Times Seen (AV)`=sum(`Status`))
-kable(output, caption="Animals in Roll Call Demography")
+output <- filter(output, `# Times Seen (AV)` > 0)
+output_md <- kable(output, caption="Animals in Roll Call Demography")
+output_md
 ```
 
-## Generating Section 4.1 - Biological Samples Summary
+### Generating Section 4.1 - Biological Samples Summary
 
 - Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, and `biological samples` tables in `.xlsx` format. Move those files into the same folder as this document.
 
@@ -378,7 +391,6 @@ kable(output, caption="Animals in Roll Call Demography")
 
 ``` {r}
 # Read in the tables dumped from Access and join them in R
-
 os <- read_xlsx("observer samples.xlsx", guess_max = 10000) # guess max set close to length of file
 os <- fixdate(os, datefield="Date") # makes sure that the date is in the correct format
 
@@ -422,10 +434,11 @@ vars <- c("rowID", "Obs Sample ID", "Observer", "Date", "Avistaje ID", "Taxon", 
 d <- select(d, vars)
 
 output <- d %>% group_by(`Taxon`, `Type of Sample`) %>% summarize(`Count`=n())
-kable(output, caption="Samples by Taxon and Sample Type")
+output_md <- kable(output, caption="Samples by Taxon and Sample Type")
+output_md
 ```
 
-## Generating Section 4.2 - Trees Marked
+### Generating Section 4.2 - Trees Marked
 
 - Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, `focal samples`, and `marked trees` tables in `.xlsx` format. Move those files into the same folder as this document.
 
@@ -473,10 +486,9 @@ d <- fixdate(d, datefield="Date") # makes sure that the date is in the correct f
 
 output <- d %>% group_by(`Taxon`, `Kind of Tree`) %>% summarize(`Count`=n())
 
-kable(output, caption="New Trees Marked by Type")
+output_md <- kable(output, caption="New Trees Marked by Type")
+output_md
 ```
-
-
 
 é\002
 m\003
