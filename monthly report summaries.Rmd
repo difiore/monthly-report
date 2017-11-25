@@ -1,40 +1,35 @@
 ---
-title: "How to do the Monthly Report"
+title: "Monthly Report"
 author: "Anthony Di Fiore"
-date: "11/25/2017"
-output: html_document
+date: "2017-11-25"
+output: github_document
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
 
-``` {r, include=FALSE} 
-library(here) # for working directory
-library(tidyverse) # for dplyr, readr, stringr, tidyr, tibble, and purrr
-library(lubridate) # supposedly in tidyverse but maybe not
-library(readxl) # to read in xlsx files
-# library(lettercase)
-library(ggplot2)
-library(knitr)
-library(sqldf)
-library(stringr)
-source("monthly report functions.R")
-# the libraries below let us print out to a word document
-library(officer)
-library(magrittr)
-library(flextable)
-my_doc <- read_docx()
-styles_info(my_doc)
+# Specify timezone... this can be modified for other study sites
+timezone <- "America/Bogota"
+
+# Specify offset from GMT... this can be modified for other study sites
+offsetFromGMT <- -5
+
+# Set the TZ for the current environment to the timezone specified above
+Sys.setenv(TZ=timezone)
+# NOTE: Sys.setenv needs to be run before the lettercase package is loaded
+
+# Load all required packages and functions
+source("monthly report source.R")
+report_doc <- read_docx() # creates an rdocx object for output to a .docx file
 ```
 
 # Writing the Monthly Report
 
-### Version 2017-10-07
+### Version 2017-11-25
 
-## INTRODUCTION
+## INSTRUCTIONS
 
 Writing a monthly report is mandatory for everyone participating on one of the *Proyecto Primates* projects in Ecuador. The report should not exceed five pages in length, including quantitative tables but excluding any attached documents (photos, videos, etc.).
 
@@ -42,7 +37,7 @@ As of 2017-10, three separate reports should be done each month, one for the *Co
 
 The report(s) must be sent before the 7th day of the month following the month that is being reported, and the associated databases should be uploaded by that date as well. We will acknowledge receiving it within a few days, and if you do not get the acknowledgement be sure to send the report again.
 
-The narrative portions of the report should written in PLAIN TEXT using a text editor (e.g., Notepad++, TextWrangler) and then pasted into the appropriate sections of the report template. Tables and figures exported from `R` (see below) should also be copied and pasted into the appropriate sections of the report. The report should be saved with under the filename indicated below: 
+The narrative portions of the report should written in PLAIN TEXT using a text editor (e.g., `Notepad++`, `TextWrangler`) and then pasted into the appropriate sections of the report document. Tables and figures exported from `R` (see below) should also be copied and pasted into the appropriate sections of the report. The report should be saved with under the filename indicated below: 
 
 - For the *Comparative Monogamy Project*: "MONTHLY REPORT YYYY-MM-DD - Comparative Monogamy Project"
 - For the woolly monkey portion of the *Ateline Project*: "MONTHLY REPORT YYYY-MM-DD - Lagothrix Project"
@@ -50,7 +45,7 @@ The narrative portions of the report should written in PLAIN TEXT using a text e
 
 While the narrative parts of your report can be in Spanish, the filename MUST be written in English and follow the convention above EXACTLY.
 
-> NOTE: Reports must be done based on information already entered, organized, and cleaned in the database!
+> NOTE: Reports must be done based on information already entered, organized, and cleaned in the database! The `R` code included below works on queries or tables exported from the database in `.xlsx` format.
 
 Reports should be prepared JOINTLY by all of the individuals responsible for project activities during the month that is being reported, and the names of all those contributing to data collection and to preparation of the report should be included. Reports should be prepared following a team meeting that takes place during the very first few days of the month. We want to “force” each team to get together for lunch or dinner or something to stop and think, to exchange ideas about what went well and what did not go as well the previous month, and to plan collectively for the following month. Such a meeting helps the project *and* helps you become better scientists.
 
@@ -73,11 +68,11 @@ Names should be separated by slashes ("/") with a slash at the end of the last n
 
 The summary should have the following components:
 
-2.1 - A narrative section describing the main highlights of the team's activities and observations during the month, e.g., what areas the groups under study were using, comments on the general weather during the month, general observations about sexual activity, births, infant behavior, etc.
+2.1 - Narrative Section - Section of text describing the main highlights of the team's activities and observations during the month, e.g., what areas the groups under study were using, comments on the general weather during the month, general observations about sexual activity, births, infant behavior, etc.
 
 2.2 - Observer Activity - Summary tables reporting general information on the activities of *each person* on the project, including dates at the station and number of OSs. This should be generated using `R` code (see below).
 
-2.3 - Avistajes Summary - A summary table reporting general information on the data collected by *each person and team*, including dates, number of AV collected, and total AV duration. This should be generated using `R` code (see below). Also include brief descriptions of notable observations made in the context of particular avistajes.
+2.3 - Avistajes - A summary table reporting general information on the data collected by *each person and team*, including dates, number of AV collected, and total AV duration. This should be generated using `R` code (see below). Also include brief descriptions of notable observations made in the context of particular avistajes.
 
 *Example:*
 
@@ -134,31 +129,75 @@ Anything else remarkable or unusual
 
 ## CODE
 
-The `R` code blocks below will help you generate the figures and tables needed for the monthly report
+The `R` code blocks below will help you generate the sections, tables, and figures needed for the monthly report.
 
-### Setting up observers, dates, taxa of interest, etc.
+### Generating Section 1 - Header Section
 
-``` {r}
-rm(list=c("observers","daterange","taxa")) # this line clears tables used for limiting observers, date ranges, and taxa from R; it will give a warning if these tables are not already present
+Setting up observers, dates, taxa of interest, etc.
 
-# MODIFY THE LINES BELOW FOR YOUR CIRCUMSTANCES!
-observers <- c("Laura Gomez", "Cristian Alvarado") # a vector of observers
-daterange <- c("2017-07-01", "2017-07-31") # a start and end date
-taxa <- c("Ateles") # a vector of taxa to consider
-groups <- c("Ateles MQ-1") # a vector of groups to consider
+``` {r header info}
+# Clear header information and vectors used for limiting observers, date ranges, and taxa from R
+# A warning is given if these variable are not already present
+rm(list=c("reportDate", "contributors", "observers","dateRange","taxa")) 
 
-# UNCOMMENT the line below for a interactive selection of observer names from a list; NOT RECOMMENDED!
-# observers <- as.character(obsEntryDialog(d))
+# Set report date
+reportDate <- "2017-11-25"
 
-# UNCOMMENT the line below for interactive selection of dates to consider; NOT RECOMMENDED!
-# daterange <- as.Date(as.POSIXct(as.numeric(daterangeEntryDialog(d))*86400,origin="1970-01-01"))
+# Set a vector of contributors
+contributors <- c("Laura Gomez", "Cristian Alvarado")
 
-offsetFromGMT <- -5 # this can be modified for other study sites
-timezone <- "America/Bogota" # this can be modified for other study sites
-Sys.setenv(TZ=timezone) # this sets the TZ for the current environment to the field environment
+# Set a vector of observers
+observers <- c("Laura Gomez", "Cristian Alvarado")
+
+# Set a vector with start and end date of range
+dateRange <- c("2017-07-01", "2017-07-31") # a start and end date
+
+# Set a vector of taxa to consider
+taxa <- c("Ateles")
+
+# Set a vector of groups to consider
+groups <- c("Ateles MQ-1")
+
+# UNCOMMENT the lines below for a interactive selection of observer names from a list
+# This will not work when knitting, so is not recommended
+# os <- read_xlsx("observer samples.xlsx", guess_max = 10000)
+# observers <- as.character(obsEntryDialog(os$Observer))
+# observers
+
+# UNCOMMENT the lines below for interactive selection of dates to consider from a list
+# This will not work when knitting, so is not recommended
+# os <- read_xlsx("observer samples.xlsx", guess_max = 10000)
+# dateRange <- as.character(as.Date(as.numeric(dateRangeEntryDialog(os$Date))/86400,origin = "1970-01-01"))
+# dateRange
+
+report_doc <- read_docx()
+styles_info(report_doc)
+
+contributorsList <- NULL
+for (i in contributors){contributorsList <- paste0(contributorsList,i,"/")}
+
+report_doc <- report_doc %>%
+	body_add_par("Header", style="heading 1", pos="after") %>%
+	body_add_par("") %>%
+	body_add_par(paste0("Date Reported: ", reportDate)) %>%
+	body_add_par("") %>%
+	body_add_par(paste0("Contributors: ", contributorsList)) %>%
+	body_add_par("")
 ```
 
-### Generating Section 2.2 - Observer Activity
+### Generating Section 2.1 - General Summary: Narrative Section
+
+``` {r general summary: narrative}
+report_doc <- report_doc %>%
+	body_add_par("General Summary", style="heading 1", pos="after") %>%
+	body_add_par("") %>%
+	body_add_par("Narrative Section", style="heading 2", pos="after") %>%
+	body_add_par("") %>%
+	body_add_par("<FILL IN THIS SECTION>", style="Normal") %>%
+	body_add_par("")
+```
+
+### Generating Section 2.2 - General Summary: Observer Activity
 
 - Open the *Proyecto Primates Main Database* and query the `observer samples` and `observer activity data` for data collected during the month in question. Set up the query as an "inner join" query (i.e., under join properites, select [1], i.e., "include rows where the joined fields from both tables are equal"...
 
@@ -168,7 +207,7 @@ Export the resulting query as "OS-OA-inner-join-query.xlsx" in `.xlsx` format. M
 
 - Open `R` and run the following:
 
-``` {r}
+``` {r general summary: observer activity}
 # The following code parses the results of a regular query (inner join) of `observer samples` and `observer activity data`; here, we start with a query of two tables in Access...
 
 d <- read_xlsx("OS-OA-inner-join-query.xlsx", guess_max = 10000) # guess max set close to length of file
@@ -257,17 +296,20 @@ outsummary <- set_formatter( x = outsummary, `Field Work` = function(x) sprintf(
 	theme_zebra() %>% 
 	autofit()
 
-my_doc <- my_doc %>%
-	body_add_par("Observer Activity by Day", style="heading 2", pos="after") %>%
+report_doc <- report_doc %>%
+	body_add_par("Observer Activity", style="heading 2", pos="after") %>%
+	body_add_par("") %>%
+	body_add_par("Observer Activity by Day", style="heading 3", pos="after") %>%
 	body_add_par("") %>%
 	body_add_flextable(value=out) %>%
 	body_add_par("") %>%
-	body_add_par("Observer Activity Summary", style="heading 2") %>%
+	body_add_par("Observer Activity Summary", style="heading 3") %>%
 	body_add_par("") %>%
 	body_add_flextable(value=outsummary)
+
 ```
 
-### Generating Section 2.3 - Avistajes Summary
+### Generating Section 2.3 - General Summary: Avistajes
 
 - Open the *Proyecto Primates Main Database* and query the `observer samples` and `avistajes` tables for data collected during the month in question. Set up the query as a "right join" query (i.e., under join properites, select [3], i.e., "include ALL records from `avistajes` and only those records from `observer samples` where the joined fields are equal"...
 
@@ -279,7 +321,7 @@ Export the resulting query as "OS-AV-query-right-join.xlsx" in `.xlsx` format. M
 
 - Open `R` and run the following:
 
-``` {r}
+``` {r general summary: avistajes}
 # The following code parses the results of the right join of `observer samples` and `avistajes`; here, we start with a query of two tables in Access...
 
 d <- read_xlsx("OS-AV-right-join-query.xlsx", guess_max = 10000) # guess max set close to length of file
@@ -347,15 +389,18 @@ outsummary <- set_formatter( x = outsummary, `Total Duration` = function(x) spri
 	theme_zebra() %>% 
   autofit()
 
-my_doc <- my_doc %>%
-	body_add_par("Avistajes by Observer and Date", style="heading 2") %>%
+report_doc <- report_doc %>%
+	body_add_par("Avistajes", style="heading 2", pos="after") %>%
+	body_add_par("") %>%
+	body_add_par("Avistajes by Observer and Date", style="heading 3", pos="after") %>%
 	body_add_par("") %>%
 	body_add_flextable(value=out) %>%
 	body_add_par("") %>%
-	body_add_par("Avistaje Summary by Observer and Group", style="heading 2") %>%
+	body_add_par("Avistajes by Observer and Group", style="heading 3") %>%
 	body_add_par("") %>%
 	body_add_flextable(value=outsummary)
 
+print(report_doc, target = "~/Desktop/report example.docx")
 ```
 
 ### Generating Section 2.4 - Focal Sample Summary
@@ -501,7 +546,7 @@ d <- d %>% mutate(`Taxon` = if_else(`Taxon` != `Taxon from Group` & `Taxon` != "
 # the following generates a vector of animal names
 ind <- id %>% select(`Animal Name`, `Taxon`, `Group`, `Age/Sex`) %>% mutate(`Taxon` = str_split(`Taxon`," ",simplify=TRUE)[,1]) %>% filter(`Taxon` %in% taxa) %>% mutate(`Animal Name` = str_replace_all(`Animal Name`,"/",""), `Group` = str_replace_all(`Group`,"MQ","MQ-"), `Sex` = if_else(str_detect(`Age/Sex`,"F"),"Female",if_else(str_detect(`Age/Sex`,"M"),"Male","")),`Age` = if_else(str_detect(`Age/Sex`,"A"),"Adult",if_else(str_detect(`Age/Sex`,"S"),"Subadult",if_else(str_detect(`Age/Sex`,"I"),"Immature",if_else(str_detect(`Age/Sex`,"J"),"Immature","")))))
 
-# now, we want to match up any roll call demography rows that had an OS instead of AV as the parent... but now, we need to use some SQL because dplyr won't let us join either this or that columns...
+# now, we want to match up any roll call demography rows that had an OS instead of AV as the parent... but now, we need to use some SQL because dplyr won't let us join either this OR that columns...
 
 d = sqldf("
   SELECT *

@@ -1,3 +1,17 @@
+library(here) # sets working directory
+library(tidyverse) # for dplyr, readr, stringr, tidyr, tibble, and purrr
+library(tcltk2) # for dialog boxes
+library(lubridate)
+library(readxl) # to read in xlsx files
+library(lettercase) # for some string functions
+library(stringr) # for some string functions
+library(ggplot2) # for plotting
+library(knitr) # for knitting
+library(sqldf) # for using SQL
+library(magrittr) # for piping
+library(officer) # for printing out to word documents
+library(flextable) # for tables
+
 fixdate <- function(x, datefield){
 	for (i in datefield){
 		Y <- year(x[[i]])
@@ -26,9 +40,8 @@ fixtime <- function(x, datefield, timefield, offsetFromGMT, timezone){
 	return(x)
 }
 
- obsEntryDialog <- function(d) {
-	obslist <- sort(unique(d$Observer))
-	require(tcltk2)
+obsEntryDialog <- function(x) {
+	obslist <- sort(unique(x))
 	win <- tktoplevel()
 	tktitle(win) <- "Observer(s)"
 	label <- tk2label(win, text = "Select name(s)...")
@@ -59,9 +72,11 @@ fixtime <- function(x, datefield, timefield, offsetFromGMT, timezone){
 	returnVal <- tclObj(choices)
 }
 
-daterangeEntryDialog <- function(d) {
-	datelist <- sort(unique(d$Date))
-	require(tcltk2)
+dateRangeEntryDialog <- function(x) {
+	datelist <- sort(unique(x))
+	#print(datelist)
+	#str(datelist)
+	#as.Date(as.numeric(datelist[1])/86400,origin = "1970-01-01")
 	win <- tktoplevel()
 	tktitle(win) <- "Dates"
 	label <- tk2label(win, text = "Select start date...")
@@ -69,15 +84,17 @@ daterangeEntryDialog <- function(d) {
 	startlist <- tk2listbox(win, height=10, width=50, selectmode="single")
 	tkgrid(startlist, padx=20, pady=c(15, 5))
 	for (i in datelist) {
-		tkinsert(startlist, "end", as.character(as.Date(i, origin = "1970-01-01")))
+		tkinsert(startlist, "end", as.character(as.Date(as.numeric(i)/86400,origin = "1970-01-01")))
 	}
+
+	str(datelist)
 
 	label <- tk2label(win, text = "Select end date...")
 	tkgrid(label, padx=20, pady=c(15, 5))
 	endlist <- tk2listbox(win, height=10, width=50, selectmode="single")
 	tkgrid(endlist, padx=20, pady=c(15, 5))
 	for (i in datelist) {
-		tkinsert(endlist, "end", as.character(as.Date(i, origin = "1970-01-01")))
+		tkinsert(endlist, "end", as.character(as.Date(as.numeric(i)/86400,origin = "1970-01-01")))
 	}
 
 	choices <- tclVar()   # tclVar() creates a Tcl variable
