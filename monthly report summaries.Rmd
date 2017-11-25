@@ -20,7 +20,14 @@ library(readxl) # to read in xlsx files
 library(ggplot2)
 library(knitr)
 library(sqldf)
+library(stringr)
 source("monthly report functions.R")
+# the libraries below let us print out to a word document
+library(officer)
+library(magrittr)
+library(flextable)
+my_doc <- read_docx()
+styles_info(my_doc)
 ```
 
 # Writing the Monthly Report
@@ -210,12 +217,12 @@ d <- d %>% filter(Duration > 0 ) # this keeps only lines with duration > 0
 
 output <- d %>% group_by(`Observer`, `Date`, `Obs Sample ID`, `General Activity`) %>% summarize(`Duration` = sum(`Duration`, na.rm = T)) %>% spread(`General Activity`, `Duration`, fill = 0, convert = FALSE) %>% mutate(`Total`=`Camp - Personal` + `Camp - Project` + `Field Work`) %>% ungroup() %>% select(`Observer`, `Date`, `Obs Sample ID`, `Field Work`, `Camp - Project`, `Camp - Personal`, `Total`)
 
-output <- mutate(output, "F" = ifelse(`Field Work` > 3600 * 8, 1, 0)) # more than 8 hours field work
-output <- mutate(output, "D" = ifelse(`Camp - Project` > 3600 * 8, 1, 0)) # more than 8 hours project work
-output <- mutate(output, "F+D" = ifelse(`Field Work` > 3600 * 4 & `Camp - Project` > 3600 * 4, 1, 0)) # more than 4 hours each of field and project work
-output <- mutate(output, "P+D" = ifelse(`Camp - Project` > 3600 * 4 & `Camp - Personal` > 3600 * 4, 1, 0)) # more than 4 hours each of project work and personal time
-output <- mutate(output, "F+P" = ifelse(`Field Work` > 3600 * 4 & `Camp - Personal` > 3600 * 4, 1, 0)) # more than 4 hours each of field work and personal time
-output <- mutate(output, "P" = ifelse(`Camp - Personal` > 3600 * 8, 1, 0)) # more than 8 hours of personal time
+output <- mutate(output, "F" = ifelse(`Field Work` >= 3600 * 8, 1, 0)) # more than 8 hours field work
+output <- mutate(output, "D" = ifelse(`Camp - Project` >= 3600 * 8, 1, 0)) # more than 8 hours project work
+output <- mutate(output, "F+D" = ifelse(`Field Work` >= 3600 * 4 & `Camp - Project` >= 3600 * 4, 1, 0)) # more than 4 hours each of field and project work
+output <- mutate(output, "P+D" = ifelse(`Camp - Project` >= 3600 * 4 & `Camp - Personal` >= 3600 * 4, 1, 0)) # more than 4 hours each of project work and personal time
+output <- mutate(output, "F+P" = ifelse(`Field Work` >= 3600 * 4 & `Camp - Personal` >= 3600 * 4, 1, 0)) # more than 4 hours each of field work and personal time
+output <- mutate(output, "P" = ifelse(`Camp - Personal` >= 3600 * 8, 1, 0)) # more than 8 hours of personal time
 output <- mutate(output, "OS" = 1)
 units(output$`Field Work`) <- "hours"
 units(output$`Camp - Personal`) <- "hours"
@@ -226,13 +233,38 @@ output_md <- kable(output[,c(1:7)], digits = 1, caption="Observer Activity by Da
 output_md
 
 output_summary <- group_by(output, `Observer`) %>%
-	summarize(`minDate`=min(`Date`),`maxDate`=max(`Date`), `minOS`=min(`Obs Sample ID`), `maxOS`=max(`Obs Sample ID`), `OS Count`= n(), `Field` = sum(`Field Work`), `Camp - Project` = sum(`Camp - Project`), `Camp - Personal` = sum(`Camp - Personal`), `F`=sum(`F`), `D`=sum(`D`), `F+D`=sum(`F+D`), `P+D`= sum(`P+D`),`F+P`= sum(`F+P`), `P`=sum(`P`), `Total`=sum(`Total`)) %>%
+	summarize(`minDate`=min(`Date`),`maxDate`=max(`Date`), `minOS`=min(`Obs Sample ID`), `maxOS`=max(`Obs Sample ID`), `OS Count`= n(), `Field Work` = sum(`Field Work`), `Camp - Project` = sum(`Camp - Project`), `Camp - Personal` = sum(`Camp - Personal`), `F`=sum(`F`), `D`=sum(`D`), `F+D`=sum(`F+D`), `P+D`= sum(`P+D`),`F+P`= sum(`F+P`), `P`=sum(`P`), `Total`=sum(`Total`)) %>%
 	mutate(`Date Range` = paste0(minDate," to ", maxDate)) %>%
 	mutate(`OS Range` = paste0(minOS, " to ", maxOS)) %>%
-	select(`Observer`,`Date Range`, `OS Range`,`OS Count`,`Field`,`Camp - Project`,`Camp - Personal`,`Total`)
+	select(`Observer`,`Date Range`, `OS Range`,`OS Count`,`Field Work`,`Camp - Project`,`Camp - Personal`,`Total`)
 
 output_summary_md <- kable(output_summary, digits = 1, caption="Observer Activity Summary")
 output_summary_md
+
+out <- regulartable(output)
+out <- set_formatter( x = out, `Field Work` = function(x) sprintf("%.01f", x)) %>%
+	set_formatter( `Camp - Project` = function(x) sprintf("%.01f", x)) %>%
+	set_formatter(  `Camp - Personal` = function(x) sprintf("%.01f", x)) %>%
+	set_formatter(  `Total` = function(x) sprintf("%.01f", x)) %>%
+	theme_zebra() %>% 
+  autofit()
+
+outsummary <- regulartable(output_summary)
+outsummary <- set_formatter( x = outsummary, `Field Work` = function(x) sprintf("%.01f", x)) %>%
+	set_formatter( `Camp - Project` = function(x) sprintf("%.01f", x)) %>%
+	set_formatter(  `Camp - Personal` = function(x) sprintf("%.01f", x)) %>%
+	set_formatter(  `Total` = function(x) sprintf("%.01f", x)) %>%
+	theme_zebra() %>% 
+	autofit()
+
+my_doc <- my_doc %>%
+	body_add_par("Observer Activity by Day", style="heading 2", pos="after") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=out) %>%
+	body_add_par("") %>%
+	body_add_par("Observer Activity Summary", style="heading 2") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=outsummary)
 ```
 
 ### Generating Section 2.3 - Avistajes Summary
@@ -304,10 +336,127 @@ units(output_summary$`Total Duration`) <- "hours"
 
 output_summary_md <- kable(output_summary, digits=3, caption="Avistaje Summary by Observer and Group")
 output_summary_md
+
+out <- regulartable(output)
+out <- set_formatter(x = out, Duration = function(x) sprintf("%.03f", x)) %>%
+	theme_zebra() %>% 
+  autofit()
+
+outsummary <- regulartable(output_summary)
+outsummary <- set_formatter( x = outsummary, `Total Duration` = function(x) sprintf("%.03f", x)) %>%
+	theme_zebra() %>% 
+  autofit()
+
+my_doc <- my_doc %>%
+	body_add_par("Avistajes by Observer and Date", style="heading 2") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=out) %>%
+	body_add_par("") %>%
+	body_add_par("Avistaje Summary by Observer and Group", style="heading 2") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=outsummary)
+
 ```
 
 ### Generating Section 2.4 - Focal Sample Summary
 
+- Open the *Proyecto Primates Main Database* and query the `observer samples`, `avistajes`, and `focal samples` tables for data collected during the month in question. Set up the query as a double "right join" query (i.e., under join properites for both links, select [3], i.e., "include ALL records from the left hand table and only those records from the right hand table where the joined fields are equal"...
+
+<img src="img/OS-AV-FS-right-join-query.png" width="500px"/>
+
+``` {r}
+# The following code parses the results of the right join of `observer samples`, `avistajes`, and `focal samples`; here, we start with a query of the three tables in Access...
+
+d <- read_xlsx("OS-AV-FS-right-join-query.xlsx", guess_max = 10000) # guess max set close to length of file
+d <- rename(d, `Obs Sample ID` = `observer samples_Obs Sample ID`)
+d <- select(d, -`avistajes_Obs Sample ID`)
+d <- rename(d, `Avistaje ID` = `avistajes_Avistaje ID`)
+d <- select(d, -`focal samples_Avistaje ID`)
+
+
+# Alternatively, we can read in three complete tables of observer samples, avistajes, and focal samples dumped from Access and do the right join on them directly in R...
+
+os <- read_xlsx("observer samples.xlsx", guess_max = 10000) # guess max set close to length of file
+av <- read_xlsx("avistajes.xlsx", guess_max = 30000) # guess max set close to length of file
+d <- right_join(os, av, by = "Obs Sample ID")
+fs <- read_xlsx("focal samples.xlsx", guess_max = 30000) # guess max set close to length of file
+d <- right_join(d, fs, by = "Avistaje ID")
+
+d <- rowid_to_column(d, "rowID")
+
+vars <- c("rowID", "Obs Sample ID", "Observer", "Date", "GPS Used", "Avistaje ID", "Taxon", "Group", "Time Enc", "Time Left/Lost", "Avistaje Notes", "Other Observer Present", "Found in Sleep Tree", "Left in Sleep Tree", "Follow Data Included", "Focal Sample ID", "Focal Animal", "Time Start", "Time End","Focal Completion")
+d <- select(d,vars)
+d <- arrange(d,`Observer`, `Date`, `Time Enc`, `Time Start`)
+
+if (length(observers) > 0) {d <- filter(d, `Observer` %in% observers)}
+if (length(daterange) > 0) {d <- filter(d, Date >= daterange[1] & Date <= daterange[2])}
+if (length(taxa) > 0) {d <- filter(d, `Taxon` %in% taxa)}
+
+d <- fixdate(d, datefield="Date") # makes sure that the date is in the correct format
+d <- fixtime(d, datefield="Date", timefield=c("Time Enc", "Time Left/Lost", "Time Start", "Time End"), offsetFromGMT, timezone) # makes sure times are in correct format
+d <- mutate(d, `Avistaje Duration`=`Time Left/Lost`-`Time Enc`) # calculates avistaje duration
+units(d$`Avistaje Duration`) <- "secs"
+d <- mutate(d, `Focal Duration` = `Time End` - `Time Start`)
+units(d$`Focal Duration`) <- "secs"
+
+# find records where the duration of an focal samples is <= 0 seconds... these should be checked and corrected in database
+warnings <- d %>% filter(`Focal Duration` <= 0 | is.na(`Focal Duration`))
+
+if (!is.null(warnings)) {
+	print("WARNING: Check the following focal samples as the times imply that the sample lasted < 0 seconds or that either Time Start or Time End = NA!")
+	print(warnings)
+	}
+
+d <- filter(d, `Focal Duration` > 0) # for summarizing focal samples, pick only those where FS duration is >0
+
+output <- d %>% mutate(`Start`=format(`Time Start`, format="%H:%M:%S"),`End`=format(`Time End`, format="%H:%M:%S")) %>% select(`Observer`, `Date`, `Avistaje ID`, `Taxon`, `Group`, `Focal Sample ID`, `Focal Animal`, `Start`, `End`, `Focal Duration`)
+units(output$`Focal Duration`) <- "hours"
+
+output_md <- kable(output, digits=3, caption="Focal Samples by Observer, Date, and Subject")
+output_md
+
+output_summary <- group_by(output,`Observer`,`Taxon`, `Focal Animal`) %>% 
+	summarize(`minDate`=min(`Date`),`maxDate`=max(`Date`), `minFS`=min(`Focal Sample ID`), `maxFS`=max(`Focal Sample ID`), `FS Count`= n(), `Total Duration`=sum(`Focal Duration`, na.rm = T)) %>%
+	mutate(`Date Range` = paste0(minDate," to ", maxDate)) %>%
+	mutate(`FS Range` = paste0(minFS, " to ", maxFS)) %>%
+	select(`Observer`, `Taxon`, `Focal Animal`, `FS Count`, `Total Duration`)
+
+units(output_summary$`Total Duration`) <- "hours"
+
+output_summary_md <- kable(output_summary, digits=3, caption="Focal Samples by Observer and Subject")
+output_summary_md
+
+output_summary <- group_by(output,`Taxon`, `Focal Animal`) %>% 
+	summarize(`minDate`=min(`Date`),`maxDate`=max(`Date`), `minFS`=min(`Focal Sample ID`), `maxFS`=max(`Focal Sample ID`), `FS Count`= n(), `Total Duration`=sum(`Focal Duration`, na.rm = T)) %>%
+	mutate(`Date Range` = paste0(minDate," to ", maxDate)) %>%
+	mutate(`FS Range` = paste0(minFS, " to ", maxFS)) %>%
+	select(`Taxon`, `Focal Animal`, `FS Count`, `Total Duration`)
+
+units(output_summary$`Total Duration`) <- "hours"
+
+output_summary_md <- kable(output_summary, digits=3, caption="Focal Samples by Subject")
+output_summary_md
+
+out <- regulartable(output)
+out <- set_formatter(x = out, `Focal Duration` = function(x) sprintf("%.03f", x)) %>%
+	theme_zebra() %>% 
+  autofit()
+
+outsummary <- regulartable(output_summary)
+outsummary <- set_formatter( x = outsummary, `Total Duration` = function(x) sprintf("%.03f", x)) %>%
+	theme_zebra() %>% 
+  autofit()
+
+my_doc <- my_doc %>%
+	body_add_par("Focal Samples by Observer, Date, and Subject", style="heading 2") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=out) %>%
+	body_add_par("") %>%
+	body_add_par("Focal Samples by Subject", style="heading 2") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=outsummary)
+
+```
 
 ### Generating Section 3.2 - Demography Summary
 
@@ -381,6 +530,16 @@ output <- d %>% group_by(`Sex`,`Age`,`Animal Name`) %>% summarize(`# Times Seen 
 output <- filter(output, `# Times Seen (AV)` > 0)
 output_md <- kable(output, caption="Animals in Roll Call Demography")
 output_md
+
+out <- regulartable(output) %>%
+	theme_zebra() %>% 
+  autofit()
+
+my_doc <- my_doc %>%
+	body_add_par("Animals in Roll Call Demography", style="heading 2") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=out)
+
 ```
 
 ### Generating Section 4.1 - Biological Samples Summary
@@ -436,6 +595,16 @@ d <- select(d, vars)
 output <- d %>% group_by(`Taxon`, `Type of Sample`) %>% summarize(`Count`=n())
 output_md <- kable(output, caption="Samples by Taxon and Sample Type")
 output_md
+
+out <- regulartable(output) %>%
+	width(j=2, width=2) %>%
+	theme_zebra()
+
+my_doc <- my_doc %>%
+	body_add_par("Samples by Taxon and Sample Type", style="heading 2") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=out)
+
 ```
 
 ### Generating Section 4.2 - Trees Marked
@@ -452,7 +621,6 @@ os <- fixdate(os, datefield="Date") # makes sure that the date is in the correct
 av <- read_xlsx("avistajes.xlsx", guess_max = 30000) # guess max set close to length of file
 fs <- read_xlsx("focal samples.xlsx", guess_max = 30000) # guess max set close to length of file
 mt <- read_xlsx("marked trees.xlsx", guess_max = 30000) # guess max set close to length of file
-
 
 # first, we join focal samples and avistajes to get of list of what AV particular FSs were collected in
 fs_av <- right_join(av, fs, by = "Avistaje ID")
@@ -488,6 +656,20 @@ output <- d %>% group_by(`Taxon`, `Kind of Tree`) %>% summarize(`Count`=n())
 
 output_md <- kable(output, caption="New Trees Marked by Type")
 output_md
+
+out <- regulartable(output) %>%
+  theme_zebra() %>% 
+  autofit()
+
+my_doc <- my_doc %>%
+	body_add_par("New Trees Marked by Type", style="heading 2") %>%
+	body_add_par("") %>%
+	body_add_flextable(value=out)
+
+```
+
+``` {r}
+print(my_doc, target = "~/Desktop/officer example.docx")
 ```
 
 é\002
