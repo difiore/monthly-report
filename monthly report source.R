@@ -85,9 +85,6 @@ dateRangeEntryDialog <- function(x) {
 	for (i in datelist) {
 		tkinsert(startlist, "end", as.character(as.Date(as.numeric(i)/86400,origin = "1970-01-01")))
 	}
-
-	str(datelist)
-
 	label <- tk2label(win, text = "Select end date...")
 	tkgrid(label, padx=20, pady=c(15, 5))
 	endlist <- tk2listbox(win, height=10, width=50, selectmode="single")
