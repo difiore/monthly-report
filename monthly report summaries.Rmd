@@ -127,7 +127,7 @@ Sys.setenv(TZ=timezone)
 
 # Load all required packages and functions
 source("monthly report source.R")
-report_doc <- read_docx() # creates an rdocx object for output to a .docx file
+report_doc <- read_docx("report template.docx") # creates an rdocx object from the report template for output to a .docx file
 ```
 
 ### Generating Section 1 - Header
@@ -321,11 +321,9 @@ outsummary <- set_formatter( x = outsummary, `Field Work` = function(x) sprintf(
 report_doc <- report_doc %>%
 	body_add_par("Observer Activity", style="heading 2", pos="after") %>%
 	body_add_par("Observer Activity by Day", style="heading 3", pos="after") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=out) %>%
 	# body_add_flextable(value=alternativeOut) %>%
 	body_add_par("Observer Activity Summary", style="heading 3") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=outsummary)
 ```
 
@@ -436,10 +434,8 @@ outsummary <- set_formatter( x = outsummary, `Total Duration (h)` = function(x) 
 report_doc <- report_doc %>%
 	body_add_par("Avistajes", style="heading 2", pos="after") %>%
 	body_add_par("Avistajes by Observer and Date", style="heading 3", pos="after") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=out) %>%
 	body_add_par("Avistajes by Observer and Group", style="heading 3") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=outsummary)
 ```
 
@@ -549,10 +545,8 @@ outsummary <- set_formatter( x = outsummary, `Total Duration (h)` = function(x) 
 report_doc <- report_doc %>%
 	body_add_par("Focal Samples", style="heading 2", pos="after") %>%
 	body_add_par("Focal Samples by Observer, Date, and Subject", style="heading 3") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=out) %>%
 	body_add_par("Focal Samples by Subject", style="heading 3") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=outsummary)
 ```
 
@@ -657,7 +651,6 @@ out <- regulartable(output) %>%
 
 report_doc <- report_doc %>%
 	body_add_par("Animals in Roll Call Demography", style="heading 2") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=out)
 ```
 
@@ -726,7 +719,6 @@ out <- regulartable(output) %>%
 report_doc <- report_doc %>%
 	body_add_par("Collections and Marked Trees", style="heading 1") %>%
 	body_add_par("Biological Samples by Taxon and Sample Type", style="heading 2") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=out)
 ```
 
@@ -790,10 +782,9 @@ out <- regulartable(output) %>%
 
 report_doc <- report_doc %>%
 	body_add_par("New Trees Marked by Type", style="heading 2") %>%
-	body_add_par("") %>%
 	body_add_flextable(value=out)
 ```
 
 ```{r Print Report}
-print(report_doc, target = "~/Desktop/report example.docx")
+print(report_doc, target = paste0("~/Desktop/monthly report ", reportDate,".docx"))
 ```
