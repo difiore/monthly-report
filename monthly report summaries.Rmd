@@ -333,7 +333,7 @@ report_doc <- report_doc %>%
 
 - Open the *Proyecto Primates Main Database* and query the `observer samples` and `avistajes` tables for data collected during the month in question. Set up the query as a "right join" query (i.e., under join properites, select [3], i.e., "include ALL records from `avistajes` and only those records from `observer samples` where the joined fields are equal"...
 
-<img src="img/OS-AV-right-join-query.png" width="500px"/>
+<img src="img/OS-AV-right-join-query.png" width="600px"/>
 
 - Export the resulting query as "OS-AV-query-right-join.xlsx" in `.xlsx` format. Move that file into the same directory as this document ("monthly-report")
 
@@ -445,7 +445,7 @@ report_doc <- report_doc %>%
 
 - Open the *Proyecto Primates Main Database* and query the `observer samples`, `avistajes`, and `focal samples` tables for data collected during the month in question. Set up the query as a double "right join" query (i.e., under join properites for both links, select [3], i.e., "include ALL records from the left hand table and only those records from the right hand table where the joined fields are equal"...
 
-<img src="img/OS-AV-FS-right-join-query.png" width="500px"/>
+<img src="img/OS-AV-FS-right-join-query.png" width="600px"/>
 
 ```{r General Summary: Focal Samples}
 # The following code parses the results of the right join of `observer samples`, `avistajes`, and `focal samples`
