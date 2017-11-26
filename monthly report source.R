@@ -1,11 +1,10 @@
 library(here) # sets working directory
-library(tidyverse) # for dplyr, readr, stringr, tidyr, tibble, and purrr
+library(tidyverse) # for dplyr, readr, tidyr, tibble, ggplot2, and purrr
 library(tcltk2) # for dialog boxes
 library(lubridate)
 library(readxl) # to read in xlsx files
 library(lettercase) # for some string functions
 library(stringr) # for some string functions
-library(ggplot2) # for plotting
 library(knitr) # for knitting
 library(sqldf) # for using SQL
 library(magrittr) # for piping
@@ -35,7 +34,7 @@ fixtime <- function(x, datefield, timefield, offsetFromGMT, timezone){
 		d <- temp$newD
 		M <- minute(x[[i]])
 		S <- second(x[[i]])
-		x[[i]] <- lubridate::make_datetime(year=Y,month=m,day=d, hour=H, min=M, sec=S, tz=timezone)
+		x[[i]] <- make_datetime(year=Y,month=m,day=d, hour=H, min=M, sec=S, tz=timezone)
 	}
 	return(x)
 }
