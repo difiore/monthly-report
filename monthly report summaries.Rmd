@@ -196,7 +196,7 @@ report_doc <- report_doc %>%
 
 - Export the resulting query as "OS-OA-inner-join-query.xlsx" in `.xlsx` format.
 
-- Move that file into the same directory as this document.
+- Move the file into the same directory as this document ("monthly-report").
 
 - Open `R` and run the following code:
 
@@ -335,7 +335,7 @@ report_doc <- report_doc %>%
 
 <img src="img/OS-AV-right-join-query.png" width="500px"/>
 
-- Export the resulting query as "OS-AV-query-right-join.xlsx" in `.xlsx` format. Move that file into the same folder as this document.
+- Export the resulting query as "OS-AV-query-right-join.xlsx" in `.xlsx` format. Move that file into the same directory as this document ("monthly-report")
 
 > NOTE: Be sure to do what is known as a RIGHT JOIN, where we select rows from the nested table and match those up with a parent... this way OSs with no AVs do not get selected (and we drop any AVs that do not have a parent OS).
 
@@ -574,7 +574,7 @@ report_doc <- report_doc %>%
 
 ### Generating Section 3.2 - Demography Summary
 
-- Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, and `roll call demography` tables in `.xlsx` format. Move those files into the same folder as this document.
+- Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, and `roll call demography` tables in `.xlsx` format. Move those files into the same directory as this document ("monthly-report").
 
 > NOTE: Here, we are only doing the joins in `R`, not in Access. This is because we need to match `roll call demography` to either a parent `avistaje` or `observer sample`.
 
@@ -659,7 +659,7 @@ report_doc <- report_doc %>%
 
 ### Generating Section 4.1 - Biological Samples
 
-- Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, and `biological samples` tables in `.xlsx` format. Move those files into the same folder as this document.
+- Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, and `biological samples` tables in `.xlsx` format. Move those files into the same directory as this document ("monthly-report").
 
 > NOTE: Here, we are only doing the joins in `R`, not in Access. This is because we need to match `biological samples` to either a parent `avistaje` or `observer sample`.
 
@@ -726,7 +726,7 @@ report_doc <- report_doc %>%
 
 ### Generating Section 4.2 - Marked Trees
 
-- Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, `focal samples`, and `marked trees` tables in `.xlsx` format. Move those files into the same folder as this document.
+- Open the *Proyecto Primates Main Database* and export the `observer samples`, `avistajes`, `focal samples`, and `marked trees` tables in `.xlsx` format. Move those files into the same directory as this document ("monthly-report").
 
 > NOTE: Here, we are only doing the joins in `R`, not in Access. This is because we need to match `marked trees` to either a parent `focal sample` or `avistaje`.
 
