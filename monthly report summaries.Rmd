@@ -53,17 +53,17 @@ The General Summary section of the report should have the following components:
 
 2.2 - Observer Activity Summary - A set of summary tables reporting general information on the activities of *each person* on the project, including dates at the station and number of OSs. This should be generated using `R` code (see below).
 
-2.3 - Avistajes Summary - A set of summary tables reporting general information on the data collected by *each person and team*, including dates, number of AV collected, and total AV duration. This should be generated using `R` code (see below). Also, if appropriate, include brief descriptions of notable observations made in the context of particular avistajes.
+2.3 - Avistajes Summary - A set of summary tables reporting general information on the data collected by *each person and team*, including dates, number of AVs collected, and total AV duration. This should be generated using `R` code (see below). Also, if appropriate, include brief comments on notable observations made in the context of particular avistajes.
 
 *Example:*
 
-> AV08140 - 2017-09-12 - While doing routine demography work, I picked up a dead signal on Cuenca's collar (Faster beep rhythm). Found the collar on the ground with the ball chain broken at the base of the unit.
+> "AV08140 (2017-09-12) - During this avistaje, I noted the presence of someone whom I think is a new individual in the group. This is a young adult female. She was seen approaching and attempting to groom my focal animal, Cuenca, during one of my focal samples (FS20016)."
 
-2.4 - Focal Sample Summary - A set of summary tables reporting general information on the data collected on each focal animal, including dates, number of FSs collected, and total FS duration. This should be generated using `R` code (see below). Also, if appropriate, include brief descriptions of notable observations made in the context of particular focal samples.
+2.4 - Focal Sample Summary - A set of summary tables reporting general information on the data collected on each focal animal, including dates, number of FSs collected, and total FS duration. This should be generated using `R` code (see below). Also, if appropriate, include brief comments on notable observations made in the context of particular focal samples.
 
 *Example:*
 
-> FS99234 - 2017-09-12 - Sofia, the subject of this focal follow, was seen soliciting two different males in short succession... first Ayax and then Mono. 
+> "FS99234 (2017-09-12) - Sofia, the subject of this focal follow, was seen soliciting two different males in short succession... first Ayax and then Mono."
 
 
 ### 3. DEMOGRAPHY SECTION
@@ -82,11 +82,13 @@ The General Summary section of the report should have the following components:
 
 > **NOTE:** Be sure to always use `YYYY-MM-DD` format for dates! It is also helpful to include the AV numbers for relevant avistajes.
 
-*Example:*
+*Examples:*
 
-> **Emigrations:**
-> Ceiba was last seen in the group on 2008-10-26 (AV54423). She was first seen traveling alone on 2008-10-30 (AV54427).
+> **Deaths**
+> "2005-09-12 (AV08140) While doing routine demography work I picked up a dead signal on the Jojo's collar (faster beep rhythm). Found the collar (black Holohil ateline collar with blue diamond tag, antenna left side, frequency 148.051) on the ground, intact, with clumps of brown fur nearby. No bones or body parts found, however."
 
+> **Emigrations**
+> "Ceiba was last seen in the group on 2008-10-26 (AV54423). She was first seen traveling alone on 2008-10-30 (AV54427)."
 
 3.2 - Demography Summary - A summary table of the demography of *each* of the groups under study. This should be generated using `R` code (see below).
 
@@ -100,6 +102,8 @@ The General Summary section of the report should have the following components:
 
 ### 5. SPECIFIC DATA SECTIONS
 
+When important events of the kinds enumerated below are witnessed (for example a fight between two groups), a brief, yet detailed, *narrative description* of the event should be included in the report. As you prepare each section, you should to relate this narrative to corresponding records in the *Proyecto Primates Main Database*, but you should not simply be copying records from the database or including simply lists of events that can be found in the database from a simple query. The goal of the qualitative, narrative text is to provide additional details and contextual information about events that are hard to express in the formal structure of the database.
+
 Intergroup Encounters
 Dispersal
 Adult Replacement
@@ -107,6 +111,42 @@ Vocalizations
 Sexual Behavior
 Anything else remarkable or unusual
 
+
+### 6. LOGISTICS AND ISSUES SECTION
+
+The final sections of the report should be used for reporting on movements of personnel in and out of the station, equipment or computer issues, data management problems, permit issues, outreach activities, etc.
+
+You should include here any requests for supplies as well as DETAILS of any problems with equipment. Be sure to send us requests for supplies with ENOUGH LEAD TIME for us to get them and send them with the next folks coming to the field. Far too frequently, we are asked to buy supplies when there are no supplies left already!
+
+- Travel Dates
+
+Provide dates of travel in or out of the station for any project personnel this month. This should match information in the database!
+
+*Examples:*
+> 2017-06-02 - Laura Abondano traveled IN to station
+> 2017-06-02 - Natalia traveled IN to station
+> 2017-06-11 - Cristian Alvarado traveled OUT of station for vacation
+> 2017-06-11 - Samantha Rettke traveled OUT of station for vacation
+> 2017-06-11 - Laura Gomez traveled OUT of station for vacation
+> 2017-06-18 - Cristian Alvarado traveled IN to station
+> 2017-06-18 - Samantha Rettke traveled IN to station
+> 2017-06-21 - Laura Gomez traveled IN to station
+
+- Data Collection and Management Issues
+
+Describe any particular situation regarding data collection and management such as an iPod not functioning (further detail on this topic should appear in the LOGISTICS section), somebody losing data or a databook, etc. Be as detailed as possible on what the issue is so that the project directors can understand the issue and, down the road, take it into account when doing data analyses.
+
+- Equipment Problems
+
+- Outreach Activities
+
+Provide a short summary of any outreach activities that project personnel engaged in during the month, e.g., giving talks or demonstrations for visiting student groups, taking visiting photographers/videographers/students to the field to visit monkeys, etc. For each activity, note the date, who from the project participated, the nature of the activity, who the audience was, and about how many attendees.
+
+*Examples:*
+
+> "2017-06-05 - Tony gave an evening talk overviewing various Proyecto Primates projects, in Spanish, for a visiting group of about 20 students from Georgetown University" > "2017-06-22 - Cristian and Laura brought a group of 3 students from the Ceiba Tropical Ecology field course with them to follow spider monkeys for the day."
+
+- Supplies Needed
 
 ## `R` CODE
 
