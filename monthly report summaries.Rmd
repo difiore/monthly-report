@@ -38,28 +38,28 @@ The report will have the following sections:
 
 The Header section of the report shoud include the following information:
 
-**Date Reported:** YYYY-MM-DD
+#### 1.1 Date Reported - YYYY-MM-DD
 
 Always use this convention for writing dates!
 
-**Contributors:** List the full names of all people involved in collecting data this month and preparing the report. Names should be separated by slashes ("/") with a slash at the end of the last name, just like they are entered in our iOS data collection devices
+#### 1.2 Contributors - List the full names of all people involved in collecting data this month and preparing the report. Names should be separated by slashes ("/") with a slash at the end of the last name, just like they are entered in our iOS data collection devices
 
 
 ### 2. GENERAL SUMMARY SECTION
 
 The General Summary section of the report should have the following components:
 
-#### 2.1 - Narrative Overview - A brief narrative describing the main highlights of the team's activities and observations during the month, e.g., what areas the groups under study were using, comments on the general weather during the month, general observations about sexual activity, births, infant behavior, etc.
+#### 2.1 Narrative Overview - A brief narrative describing the main highlights of the team's activities and observations during the month, e.g., what areas the groups under study were using, comments on the general weather during the month, general observations about sexual activity, births, infant behavior, etc.
 
-#### 2.2 - Observer Activity Summary - A set of summary tables reporting general information on the activities of *each person* on the project, including dates at the station and number of OSs. This should be generated using `R` code (see below).
+#### 2.2 Observer Activity Summary - A set of summary tables reporting general information on the activities of *each person* on the project, including dates at the station and number of OSs. This should be generated using `R` code (see below).
 
-#### 2.3 - Avistajes Summary - A set of summary tables reporting general information on the data collected by *each person and team*, including dates, number of AVs collected, and total AV duration. This should be generated using `R` code (see below). Also, if appropriate, include brief comments on notable observations made in the context of particular avistajes.
+#### 2.3 Avistajes Summary - A set of summary tables reporting general information on the data collected by *each person and team*, including dates, number of AVs collected, and total AV duration. This should be generated using `R` code (see below). Also, if appropriate, include brief comments on notable observations made in the context of particular avistajes.
 
 *Example:*
 
 > "AV08140 (2017-09-12) - During this avistaje, I noted the presence of someone whom I think is a new individual in the group. This is a young adult female. She was seen approaching and attempting to groom my focal animal, Cuenca, during one of my focal samples (FS20016)."
 
-#### 2.4 - Focal Sample Summary - A set of summary tables reporting general information on the data collected on each focal animal, including dates, number of FSs collected, and total FS duration. This should be generated using `R` code (see below). Also, if appropriate, include brief comments on notable observations made in the context of particular focal samples.
+#### 2.4 Focal Sample Summary - A set of summary tables reporting general information on the data collected on each focal animal, including dates, number of FSs collected, and total FS duration. This should be generated using `R` code (see below). Also, if appropriate, include brief comments on notable observations made in the context of particular focal samples.
 
 *Example:*
 
@@ -67,7 +67,7 @@ The General Summary section of the report should have the following components:
 
 ### 3. DEMOGRAPHY SECTION
 
-#### 3.1 - Narrative Overview - Short text sections describing any significant demographic changes to any of your study groups. The report should include *each* of the subsections below. If a section is not relevant, indicate *NOT APPLICABLE*.
+#### 3.1 Narrative Overview - Short text sections describing any significant demographic changes to any of your study groups. The report should include *each* of the subsections below. If a section is not relevant, indicate *NOT APPLICABLE*.
 
 **Births:** (include the date the mother was LAST SEEN without an infant and the date she was FISRT SEEN within an infant)
 
@@ -89,14 +89,14 @@ The General Summary section of the report should have the following components:
 > **Emigrations**
 > "Ceiba was last seen in the group on 2008-10-26 (AV54423). She was first seen traveling alone on 2008-10-30 (AV54427)."
 
-#### 3.2 - Demography Summary - A summary table of the demography of *each* of the groups under study. This should be generated using `R` code (see below).
+#### 3.2 Demography Summary - A summary table of the demography of *each* of the groups under study. This should be generated using `R` code (see below).
 
 
 ### 4. COLLECTIONS AND MARKED TREES SECTION
 
-#### 4.1 - Biological Samples - A summary table of the *biological samples* collected that month from the groups and individuals under study. This should be generated using `R` code (see below).
+#### 4.1 Biological Samples - A summary table of the *biological samples* collected that month from the groups and individuals under study. This should be generated using `R` code (see below).
 
-#### 4.2 - Marked Trees - A summary table of any *new* trees marked during this month. This should be generated using `R` code (see below).
+#### 4.2 Marked Trees - A summary table of any *new* trees marked during this month. This should be generated using `R` code (see below).
 
 
 ### 5. SPECIFIC DATA SECTIONS
@@ -106,7 +106,7 @@ When important events of the kinds enumerated below are witnessed (for example a
 #### 5.1 Intergroup Encounters
 #### 5.2 Adult Replacements
 #### 5.3 Sexual Behavior
-#### 5.4 Feeding on Army Ants and other Unusual Items
+#### 5.4 Rare Feeding Behavior
 #### 5.5 Mineral Lick Vistations
 
 
@@ -118,7 +118,7 @@ The final section of the report should be used for reporting on various logistic
 
 Provide dates of travel in or out of the station for any project personnel this month. This should match information in the database and can be generated using `R` code (see below).
 
-#### 6.2 Data Collection and Data Management Issues
+#### 6.2 Data Collection and  Management Issues
 
 Narrative section describing any particular situation regarding data collection and management, such as an iPod not functioning (further detail on this topic should appear in the LOGISTICS section), somebody losing data or a databook, etc. Be as detailed as possible about what the issue is so that the project directors can understand the issue fully and, down the road, take it into account when doing data analyses.
 
@@ -832,7 +832,7 @@ report_doc <- report_doc %>%
 	body_add_par("<FILL IN THIS SECTION>", style="Normal") %>%
 	body_add_par("Sexual Behavior", style="heading 2") %>%
 	body_add_par("<FILL IN THIS SECTION>", style="Normal") %>%
-	body_add_par("Feeding", style="heading 2") %>%
+	body_add_par("Rare Feeding Behavior", style="heading 2") %>%
 	body_add_par("<FILL IN THIS SECTION>", style="Normal") %>%
 	body_add_par("Mineral Lick Vistations", style="heading 2") %>%
 	body_add_par("<FILL IN THIS SECTION>", style="Normal")
@@ -845,7 +845,7 @@ report_doc <- report_doc %>%
 report_doc <- report_doc %>%
 	body_add_par("Logistics, Problems, and Outreach", style="heading 1", pos="after") %>%
 	body_add_par("Travel Dates", style="heading 2", pos="after") %>%
-	body_add_par("Data Collection and Data Management Issues", style="heading 2") %>%
+	body_add_par("Data Collection and Management Issues", style="heading 2") %>%
 	body_add_par("<FILL IN THIS SECTION>", style="Normal") %>%
 	body_add_par("Equipment Problems", style="heading 2") %>%
 	body_add_par("<FILL IN THIS SECTION>", style="Normal") %>%
